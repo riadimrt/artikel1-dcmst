@@ -1,0 +1,1361 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Daftar Pustaka — b-ACO DCMST</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,700;0,900;1,700&family=DM+Sans:wght@300;400;500;600&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --gold:       #F5B800;
+    --gold-light: #FFD84D;
+    --gold-pale:  #FFF8DC;
+    --gold-deep:  #C98A00;
+    --amber:      #E07B00;
+    --ink:        #1A1206;
+    --ink-mid:    #3D2E08;
+    --ink-soft:   #6B5220;
+    --paper:      #FFFDF5;
+    --paper-warm: #FFF8E7;
+    --paper-mid:  #F5EDD4;
+    --border:     #E8D280;
+    --shadow:     rgba(197, 138, 0, 0.18);
+    --shadow-deep:rgba(26, 18, 6, 0.14);
+  }
+
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  html { scroll-behavior: smooth; }
+
+  body {
+    font-family: 'DM Sans', sans-serif;
+    background: var(--paper);
+    color: var(--ink);
+    min-height: 100vh;
+    overflow-x: hidden;
+  }
+
+  /* ── NOISE TEXTURE OVERLAY ── */
+  body::before {
+    content: '';
+    position: fixed; inset: 0; z-index: 0; pointer-events: none;
+    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.035'/%3E%3C/svg%3E");
+    opacity: .6;
+  }
+
+  /* ── DECORATIVE TOP STRIPE ── */
+  .top-stripe {
+    height: 6px;
+    background: repeating-linear-gradient(90deg, var(--gold) 0, var(--gold) 60px, var(--gold-deep) 60px, var(--gold-deep) 120px);
+    position: relative; z-index: 10;
+  }
+
+  /* ── HEADER ── */
+  header {
+    position: relative; z-index: 5;
+    background: linear-gradient(135deg, var(--ink) 0%, var(--ink-mid) 60%, #2A1E00 100%);
+    padding: 56px 32px 48px;
+    overflow: hidden;
+  }
+  header::after {
+    content: '';
+    position: absolute; bottom: 0; left: 0; right: 0; height: 3px;
+    background: linear-gradient(90deg, transparent, var(--gold), var(--gold-light), var(--gold), transparent);
+  }
+  .header-deco {
+    position: absolute; top: -40px; right: -40px;
+    width: 280px; height: 280px; border-radius: 50%;
+    background: radial-gradient(circle, rgba(245,184,0,.18) 0%, transparent 70%);
+    pointer-events: none;
+  }
+  .header-deco2 {
+    position: absolute; bottom: -60px; left: 10%;
+    width: 180px; height: 180px; border-radius: 50%;
+    background: radial-gradient(circle, rgba(245,184,0,.10) 0%, transparent 70%);
+    pointer-events: none;
+  }
+  .header-inner { max-width: 900px; margin: 0 auto; position: relative; }
+  .header-badge {
+    display: inline-flex; align-items: center; gap: 8px;
+    background: rgba(245,184,0,.15); border: 1px solid rgba(245,184,0,.35);
+    color: var(--gold-light); font-family: 'DM Mono', monospace;
+    font-size: 11px; letter-spacing: 2px; text-transform: uppercase;
+    padding: 6px 14px; border-radius: 2px; margin-bottom: 20px;
+  }
+  .header-badge span { width: 6px; height: 6px; background: var(--gold); border-radius: 50%; display: inline-block; animation: blink 2s ease-in-out infinite; }
+  @keyframes blink { 0%,100%{opacity:1} 50%{opacity:.3} }
+  header h1 {
+    font-family: 'Playfair Display', serif;
+    font-size: clamp(28px, 5vw, 48px);
+    font-weight: 900;
+    color: #fff;
+    line-height: 1.1;
+    letter-spacing: -0.5px;
+    margin-bottom: 8px;
+  }
+  header h1 em {
+    font-style: italic;
+    color: var(--gold-light);
+  }
+  header p {
+    color: rgba(255,255,255,.55);
+    font-size: 14px;
+    font-weight: 300;
+    margin-top: 12px;
+    letter-spacing: 0.3px;
+  }
+  .header-stats {
+    display: flex; gap: 32px; margin-top: 28px;
+    flex-wrap: wrap;
+  }
+  .stat { display: flex; flex-direction: column; gap: 2px; }
+  .stat-num {
+    font-family: 'Playfair Display', serif;
+    font-size: 28px; font-weight: 700; color: var(--gold);
+  }
+  .stat-lbl { font-size: 11px; color: rgba(255,255,255,.4); letter-spacing: 1.5px; text-transform: uppercase; }
+
+  /* ── CONTROLS ── */
+  .controls-wrap {
+    position: sticky; top: 0; z-index: 50;
+    background: rgba(255,253,245,.92);
+    backdrop-filter: blur(12px);
+    border-bottom: 2px solid var(--border);
+    box-shadow: 0 4px 20px var(--shadow);
+  }
+  .controls {
+    max-width: 900px; margin: 0 auto;
+    padding: 14px 32px;
+    display: flex; align-items: center; gap: 12px; flex-wrap: wrap;
+  }
+  .search-wrap {
+    flex: 1; min-width: 220px;
+    position: relative;
+  }
+  .search-wrap svg {
+    position: absolute; left: 12px; top: 50%; transform: translateY(-50%);
+    width: 16px; height: 16px; color: var(--gold-deep); opacity: .7;
+  }
+  #searchInput {
+    width: 100%; padding: 10px 14px 10px 38px;
+    border: 1.5px solid var(--border);
+    border-radius: 6px;
+    background: var(--paper-warm);
+    font-family: 'DM Sans', sans-serif;
+    font-size: 13.5px; color: var(--ink);
+    outline: none; transition: border-color .2s, box-shadow .2s;
+  }
+  #searchInput:focus {
+    border-color: var(--gold);
+    box-shadow: 0 0 0 3px rgba(245,184,0,.18);
+  }
+  #searchInput::placeholder { color: var(--ink-soft); opacity: .5; }
+  .filter-group { display: flex; gap: 6px; flex-wrap: wrap; }
+  .filter-btn {
+    padding: 7px 14px; border-radius: 20px;
+    border: 1.5px solid var(--border);
+    background: transparent; cursor: pointer;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 12px; font-weight: 500; color: var(--ink-soft);
+    transition: all .2s; white-space: nowrap;
+  }
+  .filter-btn:hover { border-color: var(--gold); color: var(--ink); background: var(--gold-pale); }
+  .filter-btn.active { background: var(--gold); border-color: var(--gold); color: var(--ink); font-weight: 600; }
+  .count-badge {
+    margin-left: auto;
+    font-family: 'DM Mono', monospace;
+    font-size: 12px; color: var(--ink-soft);
+    white-space: nowrap;
+  }
+  #visibleCount { color: var(--amber); font-weight: 600; }
+
+  /* ── MAIN ── */
+  main { max-width: 900px; margin: 0 auto; padding: 40px 32px 80px; position: relative; z-index: 1; }
+
+  /* ── YEAR DIVIDER ── */
+  .year-divider {
+    display: flex; align-items: center; gap: 12px;
+    margin: 36px 0 20px;
+  }
+  .year-divider:first-child { margin-top: 0; }
+  .year-label {
+    font-family: 'Playfair Display', serif;
+    font-size: 13px; font-weight: 700; color: var(--gold-deep);
+    letter-spacing: 3px; text-transform: uppercase;
+    white-space: nowrap;
+  }
+  .year-line { flex: 1; height: 1px; background: var(--border); }
+
+  /* ── REFERENCE CARD ── */
+  .ref-card {
+    background: var(--paper-warm);
+    border: 1.5px solid var(--border);
+    border-left: 4px solid var(--gold);
+    border-radius: 8px;
+    margin-bottom: 12px;
+    overflow: hidden;
+    transition: box-shadow .25s, border-left-color .25s, transform .2s;
+    animation: slideIn .4s ease both;
+  }
+  @keyframes slideIn {
+    from { opacity: 0; transform: translateY(16px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
+  .ref-card:hover {
+    box-shadow: 0 6px 28px var(--shadow), 0 2px 8px var(--shadow-deep);
+    border-left-color: var(--amber);
+    transform: translateX(2px);
+  }
+  .ref-card.hidden { display: none; }
+
+  /* card header row */
+  .card-main { padding: 18px 20px 14px; }
+  .card-meta-row {
+    display: flex; align-items: flex-start; gap: 10px; margin-bottom: 8px;
+  }
+  .ref-num {
+    flex-shrink: 0;
+    width: 28px; height: 28px; border-radius: 50%;
+    background: var(--gold); color: var(--ink);
+    font-family: 'DM Mono', monospace; font-size: 11px; font-weight: 500;
+    display: flex; align-items: center; justify-content: center;
+    margin-top: 1px;
+  }
+  .card-text { flex: 1; min-width: 0; }
+
+  /* authors */
+  .ref-authors {
+    font-size: 13px; color: var(--ink-soft); font-weight: 400;
+    margin-bottom: 4px; line-height: 1.45;
+  }
+  .author-link {
+    color: var(--amber); text-decoration: none; font-weight: 500;
+    transition: color .15s;
+  }
+  .author-link:hover { color: var(--gold-deep); text-decoration: underline; }
+
+  /* title */
+  .ref-title {
+    font-family: 'Playfair Display', serif;
+    font-size: 16px; font-weight: 700; color: var(--ink);
+    line-height: 1.35; margin-bottom: 6px;
+    text-decoration: none; display: block;
+    transition: color .15s;
+  }
+  .ref-title:hover { color: var(--amber); }
+
+  /* venue */
+  .ref-venue {
+    font-size: 12.5px; color: var(--ink-soft);
+    font-style: italic; line-height: 1.4;
+  }
+  .ref-venue strong { font-style: normal; font-weight: 600; color: var(--ink-mid); }
+
+  /* tags row */
+  .card-tags { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 10px; }
+  .tag {
+    font-size: 10.5px; font-family: 'DM Mono', monospace;
+    padding: 3px 8px; border-radius: 3px;
+    background: var(--gold-pale); color: var(--gold-deep);
+    border: 1px solid rgba(197,138,0,.25);
+    letter-spacing: .5px;
+  }
+  .tag.book { background: #FFF0D0; color: #A0520A; border-color: rgba(160,82,10,.25); }
+  .tag.conf  { background: #F0F8E8; color: #3A6B1A; border-color: rgba(58,107,26,.25); }
+
+  /* action bar */
+  .card-actions {
+    padding: 0 20px 14px;
+    display: flex; align-items: center; gap: 8px; flex-wrap: wrap;
+  }
+  .btn {
+    display: inline-flex; align-items: center; gap: 5px;
+    padding: 6px 13px; border-radius: 5px;
+    font-family: 'DM Sans', sans-serif; font-size: 12px; font-weight: 500;
+    cursor: pointer; transition: all .18s; border: 1.5px solid;
+    text-decoration: none; white-space: nowrap;
+  }
+  .btn svg { width: 13px; height: 13px; flex-shrink: 0; }
+
+  .btn-doi {
+    background: var(--gold); border-color: var(--gold-deep);
+    color: var(--ink); font-weight: 600;
+  }
+  .btn-doi:hover { background: var(--gold-deep); color: #fff; border-color: var(--gold-deep); }
+
+  .btn-more {
+    background: transparent; border-color: var(--border); color: var(--ink-soft);
+  }
+  .btn-more:hover { background: var(--gold-pale); border-color: var(--gold); color: var(--ink); }
+  .btn-more.open { background: var(--gold-pale); border-color: var(--gold); color: var(--ink); }
+
+  .btn-dl {
+    background: var(--ink); border-color: var(--ink); color: #fff;
+  }
+  .btn-dl:hover { background: var(--amber); border-color: var(--amber); }
+
+  .btn-scholar {
+    background: transparent; border-color: var(--border); color: var(--ink-soft);
+  }
+  .btn-scholar:hover { background: var(--paper-mid); border-color: var(--ink-soft); color: var(--ink); }
+
+  .doi-chip {
+    margin-left: auto;
+    font-family: 'DM Mono', monospace; font-size: 10.5px;
+    color: var(--ink-soft); opacity: .6;
+    max-width: 220px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+  }
+
+  /* abstract panel */
+  .abstract-panel {
+    max-height: 0; overflow: hidden;
+    transition: max-height .4s ease, padding .3s ease;
+    background: var(--paper-mid);
+    border-top: 1px dashed var(--border);
+  }
+  .abstract-panel.open {
+    max-height: 600px;
+    padding: 16px 20px 18px;
+  }
+  .abstract-label {
+    font-family: 'DM Mono', monospace;
+    font-size: 10px; letter-spacing: 2px; text-transform: uppercase;
+    color: var(--gold-deep); margin-bottom: 8px;
+    display: flex; align-items: center; gap: 6px;
+  }
+  .abstract-label::after { content: ''; flex: 1; height: 1px; background: var(--border); }
+  .abstract-text {
+    font-size: 13.5px; line-height: 1.75; color: var(--ink-mid);
+    font-weight: 300;
+  }
+
+  /* ── NO RESULTS ── */
+  #noResults {
+    display: none; text-align: center; padding: 60px 20px;
+    color: var(--ink-soft);
+  }
+  #noResults .nr-icon { font-size: 48px; margin-bottom: 12px; }
+  #noResults h3 { font-family: 'Playfair Display', serif; font-size: 20px; margin-bottom: 6px; }
+  #noResults p { font-size: 13px; opacity: .6; }
+
+  /* ── FOOTER ── */
+  footer {
+    position: relative; z-index: 5;
+    background: var(--ink); color: rgba(255,255,255,.4);
+    text-align: center; padding: 28px 24px;
+    font-size: 12px; letter-spacing: 0.5px;
+  }
+  footer strong { color: var(--gold); }
+
+  /* ── BACK TO TOP ── */
+  .btt {
+    position: fixed; bottom: 28px; right: 28px; z-index: 100;
+    width: 44px; height: 44px; border-radius: 50%;
+    background: var(--gold); border: none; cursor: pointer;
+    display: flex; align-items: center; justify-content: center;
+    box-shadow: 0 4px 16px var(--shadow);
+    opacity: 0; transform: translateY(10px);
+    transition: opacity .3s, transform .3s;
+    pointer-events: none;
+  }
+  .btt.visible { opacity: 1; transform: translateY(0); pointer-events: auto; }
+  .btt:hover { background: var(--amber); }
+  .btt svg { width: 18px; height: 18px; color: var(--ink); }
+
+  /* ── RESPONSIVE ── */
+  @media (max-width: 600px) {
+    header { padding: 36px 20px 32px; }
+    main { padding: 24px 16px 60px; }
+    .controls { padding: 10px 16px; }
+    .ref-title { font-size: 14px; }
+    .header-stats { gap: 20px; }
+    .doi-chip { display: none; }
+  }
+</style>
+</head>
+<body>
+
+<div class="top-stripe"></div>
+
+<header>
+  <div class="header-deco"></div>
+  <div class="header-deco2"></div>
+  <div class="header-inner">
+    <div class="header-badge">
+      <span></span>
+      b-ACO Research · DCMST · 2025
+    </div>
+    <h1>Daftar Pustaka<br><em>b-ACO for DCMST</em></h1>
+    <p>Borůvka-based Ant Colony Optimization · Degree-Constrained Minimum Spanning Tree</p>
+    <div class="header-stats">
+      <div class="stat">
+        <span class="stat-num">28</span>
+        <span class="stat-lbl">Referensi</span>
+      </div>
+      <div class="stat">
+        <span class="stat-num">22</span>
+        <span class="stat-lbl">Dengan DOI</span>
+      </div>
+      <div class="stat">
+        <span class="stat-num">1926–2024</span>
+        <span class="stat-lbl">Rentang Tahun</span>
+      </div>
+    </div>
+  </div>
+</header>
+
+<div class="controls-wrap">
+  <div class="controls">
+    <div class="search-wrap">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
+      <input type="text" id="searchInput" placeholder="Cari penulis, judul, jurnal...">
+    </div>
+    <div class="filter-group">
+      <button class="filter-btn active" data-filter="all">Semua</button>
+      <button class="filter-btn" data-filter="journal">Jurnal</button>
+      <button class="filter-btn" data-filter="book">Buku</button>
+      <button class="filter-btn" data-filter="conf">Prosiding</button>
+      <button class="filter-btn" data-filter="doi">Ada DOI</button>
+    </div>
+    <div class="count-badge"><span id="visibleCount">28</span> / 28</div>
+  </div>
+</div>
+
+<main id="refList">
+
+<!-- ── 1926 ── -->
+<div class="year-divider"><span class="year-label">1926</span><div class="year-line"></div></div>
+
+<div class="ref-card" data-type="journal" data-year="1926">
+  <div class="card-main">
+    <div class="card-meta-row">
+      <div class="ref-num">1</div>
+      <div class="card-text">
+        <div class="ref-authors">Borůvka, O.</div>
+        <a class="ref-title" href="https://dml.cz/handle/10338.dmlcz/500785" target="_blank">O jistém problému minimálním</a>
+        <div class="ref-venue"><em>Práce Moravské Přírodovědecké Společnosti</em>, <strong>3</strong>(3), 37–58.</div>
+        <div class="card-tags"><span class="tag">MST</span><span class="tag">Graf Teori</span><span class="tag">Fondasi</span></div>
+      </div>
+    </div>
+  </div>
+  <div class="card-actions">
+    <a class="btn btn-scholar" href="https://scholar.google.com/scholar?q=Boruvka+1926+minimum+spanning+tree" target="_blank">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2L2 7l10 5 10-5-10-5z"/><path d="M2 17l10 5 10-5M2 12l10 5 10-5"/></svg>Scholar
+    </a>
+    <button class="btn btn-more" onclick="toggleAbstract(this)">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14,2 14,8 20,8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>Abstrak
+    </button>
+  </div>
+  <div class="abstract-panel">
+    <div class="abstract-label">Abstrak</div>
+    <div class="abstract-text">Paper perintis (1926) oleh Otakar Borůvka yang memperkenalkan <strong>algoritma pertama untuk Minimum Spanning Tree</strong>. Borůvka merancang algoritma ini untuk memecahkan masalah jaringan listrik paling ekonomis di Moravia. Algoritma ini bekerja dengan cara setiap komponen graf secara simultan dan independen memilih edge keluar berbobot minimum — sifat paralelisme alami yang menjadi inspirasi langsung b-ACO. Paper ini merupakan tonggak sejarah Optimisasi Kombinatorial modern.</div>
+  </div>
+</div>
+
+<!-- ── 1956 ── -->
+<div class="year-divider"><span class="year-label">1956</span><div class="year-line"></div></div>
+
+<div class="ref-card" data-type="journal" data-year="1956" data-doi="1">
+  <div class="card-main">
+    <div class="card-meta-row">
+      <div class="ref-num">2</div>
+      <div class="card-text">
+        <div class="ref-authors">Kruskal, J. B.</div>
+        <a class="ref-title" href="https://doi.org/10.1090/S0002-9939-1956-0078686-7" target="_blank">On the shortest spanning subtree of a graph and the traveling salesman problem</a>
+        <div class="ref-venue"><em>Proceedings of the American Mathematical Society</em>, <strong>7</strong>(1), 48–50.</div>
+        <div class="card-tags"><span class="tag">MST</span><span class="tag">Algoritma Kruskal</span><span class="tag">Fondasi</span></div>
+      </div>
+    </div>
+  </div>
+  <div class="card-actions">
+    <a class="btn btn-doi" href="https://doi.org/10.1090/S0002-9939-1956-0078686-7" target="_blank">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15,3 21,3 21,9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>DOI
+    </a>
+    <button class="btn btn-more" onclick="toggleAbstract(this)">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14,2 14,8 20,8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>Abstrak
+    </button>
+    <span class="doi-chip">10.1090/S0002-9939-1956-0078686-7</span>
+  </div>
+  <div class="abstract-panel">
+    <div class="abstract-label">Abstrak</div>
+    <div class="abstract-text">Paper klasik Kruskal (1956) yang memperkenalkan <strong>algoritma Kruskal</strong> untuk MST: menyeleksi edge minimum secara global dengan struktur <em>union-find</em> untuk mencegah siklus. Algoritma ini menjadi inspirasi langsung k-ACO dalam penelitian Bau et al. (2008), dan menjadi salah satu baseline dalam artikel b-ACO ini.</div>
+  </div>
+</div>
+
+<!-- ── 1957 ── -->
+<div class="year-divider"><span class="year-label">1957</span><div class="year-line"></div></div>
+
+<div class="ref-card" data-type="journal" data-year="1957" data-doi="1">
+  <div class="card-main">
+    <div class="card-meta-row">
+      <div class="ref-num">3</div>
+      <div class="card-text">
+        <div class="ref-authors">Prim, R. C.</div>
+        <a class="ref-title" href="https://doi.org/10.1002/j.1538-7305.1957.tb01515.x" target="_blank">Shortest connection networks and some generalizations</a>
+        <div class="ref-venue"><em>The Bell System Technical Journal</em>, <strong>36</strong>(6), 1389–1401.</div>
+        <div class="card-tags"><span class="tag">MST</span><span class="tag">Algoritma Prim</span><span class="tag">Fondasi</span></div>
+      </div>
+    </div>
+  </div>
+  <div class="card-actions">
+    <a class="btn btn-doi" href="https://doi.org/10.1002/j.1538-7305.1957.tb01515.x" target="_blank">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15,3 21,3 21,9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>DOI
+    </a>
+    <button class="btn btn-more" onclick="toggleAbstract(this)">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14,2 14,8 20,8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>Abstrak
+    </button>
+    <span class="doi-chip">10.1002/j.1538-7305.1957.tb01515.x</span>
+  </div>
+  <div class="abstract-panel">
+    <div class="abstract-label">Abstrak</div>
+    <div class="abstract-text">Prim (1957) memperkenalkan <strong>algoritma Prim</strong> untuk MST yang bekerja dengan menumbuhkan satu pohon tunggal secara inkremental dari vertex akar. Algoritma ini menjadi inspirasi langsung p-ACO dalam Bau et al. (2008), dan menjadi salah satu baseline perbandingan dalam artikel b-ACO ini.</div>
+  </div>
+</div>
+
+<!-- ── 1979 ── -->
+<div class="year-divider"><span class="year-label">1979</span><div class="year-line"></div></div>
+
+<div class="ref-card" data-type="book" data-year="1979">
+  <div class="card-main">
+    <div class="card-meta-row">
+      <div class="ref-num">4</div>
+      <div class="card-text">
+        <div class="ref-authors">Garey, M. R., &amp; Johnson, D. S.</div>
+        <a class="ref-title" href="https://dl.acm.org/doi/book/10.5555/574848" target="_blank">Computers and intractability: A guide to the theory of NP-completeness</a>
+        <div class="ref-venue">W. H. Freeman.</div>
+        <div class="card-tags"><span class="tag book">Buku</span><span class="tag">NP-Hard</span><span class="tag">Kompleksitas</span></div>
+      </div>
+    </div>
+  </div>
+  <div class="card-actions">
+    <a class="btn btn-scholar" href="https://scholar.google.com/scholar?q=Garey+Johnson+1979+NP-completeness" target="_blank">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2L2 7l10 5 10-5-10-5z"/><path d="M2 17l10 5 10-5M2 12l10 5 10-5"/></svg>Scholar
+    </a>
+    <button class="btn btn-more" onclick="toggleAbstract(this)">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14,2 14,8 20,8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>Abstrak
+    </button>
+  </div>
+  <div class="abstract-panel">
+    <div class="abstract-label">Abstrak</div>
+    <div class="abstract-text">Buku referensi standar untuk teori NP-completeness. Dijadikan acuan dalam artikel untuk mendukung klaim bahwa DCMST adalah masalah <strong>NP-hard</strong> melalui reduksi ke <em>Hamiltonian path problem</em> pada kasus derajat d=2 — membuktikan mengapa pendekatan heuristik seperti ACO diperlukan.</div>
+  </div>
+</div>
+
+<!-- ── 1980 ── -->
+<div class="year-divider"><span class="year-label">1980</span><div class="year-line"></div></div>
+
+<div class="ref-card" data-type="journal" data-year="1980" data-doi="1">
+  <div class="card-main">
+    <div class="card-meta-row">
+      <div class="ref-num">5</div>
+      <div class="card-text">
+        <div class="ref-authors">Narula, S. C., &amp; Ho, C. A.</div>
+        <a class="ref-title" href="https://doi.org/10.1016/0305-0548(80)90022-2" target="_blank">Degree-constrained minimum spanning tree</a>
+        <div class="ref-venue"><em>Computers &amp; Operations Research</em>, <strong>7</strong>(4), 239–249.</div>
+        <div class="card-tags"><span class="tag">DCMST</span><span class="tag">Definisi Formal</span><span class="tag">NP-Hard</span></div>
+      </div>
+    </div>
+  </div>
+  <div class="card-actions">
+    <a class="btn btn-doi" href="https://doi.org/10.1016/0305-0548(80)90022-2" target="_blank">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15,3 21,3 21,9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>DOI
+    </a>
+    <button class="btn btn-more" onclick="toggleAbstract(this)">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14,2 14,8 20,8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>Abstrak
+    </button>
+    <span class="doi-chip">10.1016/0305-0548(80)90022-2</span>
+  </div>
+  <div class="abstract-panel">
+    <div class="abstract-label">Abstrak</div>
+    <div class="abstract-text"><strong>Paper pertama yang secara formal mendefinisikan masalah DCMST.</strong> Narula &amp; Ho (1980) memformulasikan DCMST sebagai masalah integer programming linear 0-1 dan membuktikan sifat NP-hardness-nya untuk d ∈ [2, |V|−2]. Hasil ini menjadi landasan teoritis utama yang menjelaskan mengapa pendekatan heuristik dan metaheuristik diperlukan.</div>
+  </div>
+</div>
+
+<!-- ── 1996 ── -->
+<div class="year-divider"><span class="year-label">1996</span><div class="year-line"></div></div>
+
+<div class="ref-card" data-type="journal" data-year="1996" data-doi="1">
+  <div class="card-main">
+    <div class="card-meta-row">
+      <div class="ref-num">6</div>
+      <div class="card-text">
+        <div class="ref-authors">Dorigo, M., Maniezzo, V., &amp; Colorni, A.</div>
+        <a class="ref-title" href="https://doi.org/10.1109/3477.484436" target="_blank">Ant system: Optimization by a colony of cooperating agents</a>
+        <div class="ref-venue"><em>IEEE Transactions on Systems, Man, and Cybernetics—Part B: Cybernetics</em>, <strong>26</strong>(1), 29–41.</div>
+        <div class="card-tags"><span class="tag">ACO</span><span class="tag">Ant System</span><span class="tag">Swarm Intelligence</span></div>
+      </div>
+    </div>
+  </div>
+  <div class="card-actions">
+    <a class="btn btn-doi" href="https://doi.org/10.1109/3477.484436" target="_blank">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15,3 21,3 21,9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>DOI
+    </a>
+    <button class="btn btn-more" onclick="toggleAbstract(this)">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14,2 14,8 20,8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>Abstrak
+    </button>
+    <span class="doi-chip">10.1109/3477.484436</span>
+  </div>
+  <div class="abstract-panel">
+    <div class="abstract-label">Abstrak</div>
+    <div class="abstract-text">Paper fondasi ACO. Dorigo et al. (1996) memperkenalkan <strong>Ant System (AS)</strong> — paradigma komputasi baru yang terinspirasi koloni semut. Karakteristik utama: <em>positive feedback</em>, komputasi terdistribusi, dan heuristik greedy konstruktif. Diuji pada TSP dan masalah kombinatorial lain. Menjadi dasar rumus probabilitas pemilihan komponen solusi (Persamaan 5) yang digunakan dalam b-ACO.</div>
+  </div>
+</div>
+
+<div class="ref-card" data-type="conf" data-year="1996">
+  <div class="card-main">
+    <div class="card-meta-row">
+      <div class="ref-num">7</div>
+      <div class="card-text">
+        <div class="ref-authors">Chung, F. R. K., &amp; Condon, A.</div>
+        <a class="ref-title" href="https://doi.org/10.1109/IPPS.1996.508073" target="_blank">Parallel graph algorithms with processor failures</a>
+        <div class="ref-venue"><em>SIAM Journal on Computing</em>, <strong>25</strong>(1), 229–253.</div>
+        <div class="card-tags"><span class="tag">Paralel</span><span class="tag">Borůvka</span><span class="tag">Graf Paralel</span></div>
+      </div>
+    </div>
+  </div>
+  <div class="card-actions">
+    <a class="btn btn-doi" href="https://doi.org/10.1109/IPPS.1996.508073" target="_blank">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15,3 21,3 21,9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>DOI
+    </a>
+    <button class="btn btn-more" onclick="toggleAbstract(this)">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14,2 14,8 20,8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>Abstrak
+    </button>
+  </div>
+  <div class="abstract-panel">
+    <div class="abstract-label">Abstrak</div>
+    <div class="abstract-text">Mendukung argumen bahwa algoritma Borůvka secara alami mendukung paralelisasi karena setiap komponen dapat memilih edge keluar terbaik secara <strong>independen dan simultan</strong>. Digunakan dalam artikel untuk memperkuat klaim bahwa sifat paralel Borůvka berkorespondensi langsung dengan paradigma multi-agen ACO.</div>
+  </div>
+</div>
+
+<!-- ── 1997 ── -->
+<div class="year-divider"><span class="year-label">1997</span><div class="year-line"></div></div>
+
+<div class="ref-card" data-type="book" data-year="1997" data-doi="1">
+  <div class="card-main">
+    <div class="card-meta-row">
+      <div class="ref-num">8</div>
+      <div class="card-text">
+        <div class="ref-authors">Deo, N., &amp; Kumar, N.</div>
+        <a class="ref-title" href="https://doi.org/10.1007/978-3-642-59179-2_10" target="_blank">Computation of constrained spanning trees: A unified approach</a>
+        <div class="ref-venue">In P. M. Pardalos et al. (Eds.), <em>Network Optimization: Lecture Notes in Economics and Mathematical Systems</em> (Vol. 450, pp. 194–220). Springer-Verlag.</div>
+        <div class="card-tags"><span class="tag book">Book Chapter</span><span class="tag">SHRD Dataset</span><span class="tag">DCMST</span></div>
+      </div>
+    </div>
+  </div>
+  <div class="card-actions">
+    <a class="btn btn-doi" href="https://doi.org/10.1007/978-3-642-59179-2_10" target="_blank">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15,3 21,3 21,9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>DOI
+    </a>
+    <button class="btn btn-more" onclick="toggleAbstract(this)">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14,2 14,8 20,8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>Abstrak
+    </button>
+    <span class="doi-chip">10.1007/978-3-642-59179-2_10</span>
+  </div>
+  <div class="abstract-panel">
+    <div class="abstract-label">Abstrak</div>
+    <div class="abstract-text">Menyediakan pendekatan terpadu untuk berbagai masalah constrained spanning tree. Penting karena memperkenalkan <strong>dataset SHRD (Structured Hard Random Distance)</strong> — dataset benchmark utama yang digunakan dalam eksperimen b-ACO. SHRD dirancang untuk membuat masalah sulit bagi algoritma greedy karena MST-nya berbentuk bintang berderajat |V|−1.</div>
+  </div>
+</div>
+
+<!-- ── 2000 ── -->
+<div class="year-divider"><span class="year-label">2000</span><div class="year-line"></div></div>
+
+<div class="ref-card" data-type="journal" data-year="2000" data-doi="1">
+  <div class="card-main">
+    <div class="card-meta-row">
+      <div class="ref-num">9</div>
+      <div class="card-text">
+        <div class="ref-authors">Knowles, J. D., &amp; Corne, D. W.</div>
+        <a class="ref-title" href="https://doi.org/10.1109/4235.850653" target="_blank">A new evolutionary approach to the degree-constrained minimum spanning tree problem</a>
+        <div class="ref-venue"><em>IEEE Transactions on Evolutionary Computation</em>, <strong>4</strong>(2), 125–134.</div>
+        <div class="card-tags"><span class="tag">Evolusioner</span><span class="tag">M-graph</span><span class="tag">DCMST</span></div>
+      </div>
+    </div>
+  </div>
+  <div class="card-actions">
+    <a class="btn btn-doi" href="https://doi.org/10.1109/4235.850653" target="_blank">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15,3 21,3 21,9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>DOI
+    </a>
+    <button class="btn btn-more" onclick="toggleAbstract(this)">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14,2 14,8 20,8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>Abstrak
+    </button>
+    <span class="doi-chip">10.1109/4235.850653</span>
+  </div>
+  <div class="abstract-panel">
+    <div class="abstract-label">Abstrak</div>
+    <div class="abstract-text">Memperkenalkan algoritma evolusioner K-EA berbasis representasi edge untuk DCMST. Penting karena memperkenalkan <strong>M-graph dataset</strong> (Misleading Graph) — dataset benchmark kedua yang digunakan dalam artikel b-ACO. M-graph dirancang untuk menyesatkan heuristik greedy karena bobotnya sengaja dikonstruksi agar MST-nya tidak bisa ditemukan dengan mudah oleh pendekatan lokal.</div>
+  </div>
+</div>
+
+<div class="ref-card" data-type="journal" data-year="2000" data-doi="1">
+  <div class="card-main">
+    <div class="card-meta-row">
+      <div class="ref-num">10</div>
+      <div class="card-text">
+        <div class="ref-authors">Stützle, T., &amp; Hoos, H. H.</div>
+        <a class="ref-title" href="https://doi.org/10.1016/S0167-739X(00)00043-1" target="_blank">MAX–MIN ant system</a>
+        <div class="ref-venue"><em>Future Generation Computer Systems</em>, <strong>16</strong>(8), 889–914.</div>
+        <div class="card-tags"><span class="tag">ACO</span><span class="tag">MAX-MIN</span><span class="tag">Pheromone</span></div>
+      </div>
+    </div>
+  </div>
+  <div class="card-actions">
+    <a class="btn btn-doi" href="https://doi.org/10.1016/S0167-739X(00)00043-1" target="_blank">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15,3 21,3 21,9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>DOI
+    </a>
+    <button class="btn btn-more" onclick="toggleAbstract(this)">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14,2 14,8 20,8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>Abstrak
+    </button>
+    <span class="doi-chip">10.1016/S0167-739X(00)00043-1</span>
+  </div>
+  <div class="abstract-panel">
+    <div class="abstract-label">Abstrak</div>
+    <div class="abstract-text">Memperkenalkan <strong>MAX–MIN Ant System (MMAS)</strong> — perbaikan Ant System dengan pembatasan intensitas pheromone pada interval [τ_min, τ_max] dan strategi <em>elitist</em>. Digunakan dalam artikel sebagai dasar mekanisme pembaruan pheromone (Persamaan 6) dan justifikasi bahwa distribusi pheromone stabil jauh sebelum iterasi maksimum — mendukung rasionale early stopping b-ACO.</div>
+  </div>
+</div>
+
+<div class="ref-card" data-type="conf" data-year="2000">
+  <div class="card-main">
+    <div class="card-meta-row">
+      <div class="ref-num">11</div>
+      <div class="card-text">
+        <div class="ref-authors">Raidl, G. R.</div>
+        <a class="ref-title" href="https://ieeexplore.ieee.org/document/870306" target="_blank">An efficient evolutionary algorithm for the degree-constrained minimum spanning tree problem</a>
+        <div class="ref-venue">In <em>Proceedings of the 2000 Congress on Evolutionary Computation</em> (Vol. 1, pp. 104–111). IEEE.</div>
+        <div class="card-tags"><span class="tag conf">Prosiding</span><span class="tag">Evolusioner</span><span class="tag">DCMST</span></div>
+      </div>
+    </div>
+  </div>
+  <div class="card-actions">
+    <a class="btn btn-scholar" href="https://scholar.google.com/scholar?q=Raidl+2000+evolutionary+degree-constrained+minimum+spanning+tree" target="_blank">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2L2 7l10 5 10-5-10-5z"/><path d="M2 17l10 5 10-5M2 12l10 5 10-5"/></svg>Scholar
+    </a>
+    <button class="btn btn-more" onclick="toggleAbstract(this)">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14,2 14,8 20,8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>Abstrak
+    </button>
+  </div>
+  <div class="abstract-panel">
+    <div class="abstract-label">Abstrak</div>
+    <div class="abstract-text">Raidl (2000) mengusulkan algoritma evolusioner efisien untuk DCMST. Disebutkan dalam artikel sebagai bagian dari standar de facto benchmark DCMST — kombinasi SHRD dan M-graph yang digunakan oleh penelitian ini sudah menjadi standar evaluasi sejak era Raidl.</div>
+  </div>
+</div>
+
+<!-- ── 2001 ── -->
+<div class="year-divider"><span class="year-label">2001</span><div class="year-line"></div></div>
+
+<div class="ref-card" data-type="journal" data-year="2001" data-doi="1">
+  <div class="card-main">
+    <div class="card-meta-row">
+      <div class="ref-num">12</div>
+      <div class="card-text">
+        <div class="ref-authors">Caccetta, L., &amp; Hill, S. P.</div>
+        <a class="ref-title" href="https://doi.org/10.1002/1097-0037(200103)37:2%3C74::AID-NET1%3E3.0.CO;2-P" target="_blank">A branch and cut method for the degree constrained minimum spanning tree problem</a>
+        <div class="ref-venue"><em>Networks</em>, <strong>37</strong>(2), 74–83.</div>
+        <div class="card-tags"><span class="tag">Eksak</span><span class="tag">Branch &amp; Cut</span><span class="tag">DCMST</span></div>
+      </div>
+    </div>
+  </div>
+  <div class="card-actions">
+    <a class="btn btn-doi" href="https://www.researchgate.net/publication/220209662_A_branch_and_cut_method_for_the_degree-constrained_minimum_spanning_tree_problem" target="_blank">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15,3 21,3 21,9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>DOI
+    </a>
+    <button class="btn btn-more" onclick="toggleAbstract(this)">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14,2 14,8 20,8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>Abstrak
+    </button>
+  </div>
+  <div class="abstract-panel">
+    <div class="abstract-label">Abstrak</div>
+    <div class="abstract-text">Metode <strong>branch-and-cut</strong> eksak untuk DCMST, menggabungkan branch-and-bound dengan cutting planes. Mengembangkan kelas valid inequalities baru yang memperkuat formulasi LP relaxation. Digunakan dalam artikel sebagai representasi pendekatan eksak yang keterbatasan skalabilitasnya mendorong pengembangan metaheuristik seperti ACO.</div>
+  </div>
+</div>
+
+<div class="ref-card" data-type="book" data-year="2001">
+  <div class="card-main">
+    <div class="card-meta-row">
+      <div class="ref-num">13</div>
+      <div class="card-text">
+        <div class="ref-authors">Cormen, T. H., Leiserson, C. E., Rivest, R. L., &amp; Stein, C.</div>
+        <a class="ref-title" href="https://mitpress.mit.edu/9780262046305/" target="_blank">Introduction to algorithms (2nd ed.)</a>
+        <div class="ref-venue">MIT Press.</div>
+        <div class="card-tags"><span class="tag book">Buku</span><span class="tag">Union-Find</span><span class="tag">Algoritma</span></div>
+      </div>
+    </div>
+  </div>
+  <div class="card-actions">
+    <a class="btn btn-scholar" href="https://scholar.google.com/scholar?q=Cormen+Leiserson+Rivest+Stein+Introduction+Algorithms+2001" target="_blank">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2L2 7l10 5 10-5-10-5z"/><path d="M2 17l10 5 10-5M2 12l10 5 10-5"/></svg>Scholar
+    </a>
+    <button class="btn btn-more" onclick="toggleAbstract(this)">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14,2 14,8 20,8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>Abstrak
+    </button>
+  </div>
+  <div class="abstract-panel">
+    <div class="abstract-label">Abstrak</div>
+    <div class="abstract-text">Buku algoritma standar dunia. Dirujuk dalam artikel untuk mendukung penjelasan teknis k-ACO, khususnya penggunaan <strong>struktur data union-find</strong> sebagai mekanisme deteksi siklus dalam konstruksi spanning tree berbasis Kruskal — fondasi yang sama digunakan dalam b-ACO untuk resolusi konflik antar komponen Borůvka.</div>
+  </div>
+</div>
+
+<div class="ref-card" data-type="journal" data-year="2001" data-doi="1">
+  <div class="card-main">
+    <div class="card-meta-row">
+      <div class="ref-num">14</div>
+      <div class="card-text">
+        <div class="ref-authors">Krishnamoorthy, M., Ernst, A. T., &amp; Sharaiha, Y. M.</div>
+        <a class="ref-title" href="https://doi.org/10.1023/A:1011977126230" target="_blank">Comparison of algorithms for the degree constrained minimum spanning tree</a>
+        <div class="ref-venue"><em>Journal of Heuristics</em>, <strong>7</strong>(6), 587–611.</div>
+        <div class="card-tags"><span class="tag">DCMST</span><span class="tag">Benchmark</span><span class="tag">Perbandingan</span></div>
+      </div>
+    </div>
+  </div>
+  <div class="card-actions">
+    <a class="btn btn-doi" href="https://doi.org/10.1023/A:1011977126230" target="_blank">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15,3 21,3 21,9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>DOI
+    </a>
+    <button class="btn btn-more" onclick="toggleAbstract(this)">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14,2 14,8 20,8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>Abstrak
+    </button>
+    <span class="doi-chip">10.1023/A:1011977126230</span>
+  </div>
+  <div class="abstract-panel">
+    <div class="abstract-label">Abstrak</div>
+    <div class="abstract-text">Perbandingan komprehensif algoritma untuk DCMST — simulated annealing, genetic algorithm, dan problem space search. Penting dalam artikel karena: (1) menyediakan formulasi MILP DCMST (Definisi 2.3), dan (2) mendefinisikan spesifikasi dataset SHRD yang digunakan sebagai benchmark utama eksperimen b-ACO.</div>
+  </div>
+</div>
+
+<div class="ref-card" data-type="journal" data-year="2001" data-doi="1">
+  <div class="card-main">
+    <div class="card-meta-row">
+      <div class="ref-num">15</div>
+      <div class="card-text">
+        <div class="ref-authors">Nešetřil, J., Milková, E., &amp; Nešetřilová, H.</div>
+        <a class="ref-title" href="https://doi.org/10.1016/S0012-365X(00)00224-7" target="_blank">Otakar Borůvka on minimum spanning tree problem: Translation of both the 1926 papers, comments, history</a>
+        <div class="ref-venue"><em>Discrete Mathematics</em>, <strong>233</strong>(1–3), 3–36.</div>
+        <div class="card-tags"><span class="tag">Sejarah</span><span class="tag">Borůvka</span><span class="tag">MST</span></div>
+      </div>
+    </div>
+  </div>
+  <div class="card-actions">
+    <a class="btn btn-doi" href="https://doi.org/10.1016/S0012-365X(00)00224-7" target="_blank">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15,3 21,3 21,9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>DOI
+    </a>
+    <button class="btn btn-more" onclick="toggleAbstract(this)">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14,2 14,8 20,8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>Abstrak
+    </button>
+    <span class="doi-chip">10.1016/S0012-365X(00)00224-7</span>
+  </div>
+  <div class="abstract-panel">
+    <div class="abstract-label">Abstrak</div>
+    <div class="abstract-text">Terjemahan bahasa Inggris pertama dari kedua paper Borůvka (1926), disertai survei sejarah dan komentar. Digunakan dalam artikel sebagai sumber otoritatif untuk klaim bahwa algoritma Borůvka adalah MST solver pertama (1926) sekaligus "dasar dari algoritma tercepat yang diketahui" — memperkuat relevansi b-ACO sebagai varian ACO berbasis Borůvka.</div>
+  </div>
+</div>
+
+<!-- ── 2002 ── -->
+<div class="year-divider"><span class="year-label">2002</span><div class="year-line"></div></div>
+
+<div class="ref-card" data-type="journal" data-year="2002" data-doi="1">
+  <div class="card-main">
+    <div class="card-meta-row">
+      <div class="ref-num">16</div>
+      <div class="card-text">
+        <div class="ref-authors">Kawatra, R.</div>
+        <a class="ref-title" href="https://linkinghub.elsevier.com/retrieve/pii/S0377221701003216" target="_blank">A multi-period degree-constrained minimum spanning tree problem</a>
+        <div class="ref-venue"><em>European Journal of Operational Research</em>, <strong>143</strong>(1), 53–63.</div>
+        <div class="card-tags"><span class="tag">MPDCMST</span><span class="tag">Multi-Periode</span><span class="tag">Fondasi</span></div>
+      </div>
+    </div>
+  </div>
+  <div class="card-actions">
+    <a class="btn btn-doi" href="https://linkinghub.elsevier.com/retrieve/pii/S0377221701003216" target="_blank">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15,3 21,3 21,9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>DOI
+    </a>
+    <button class="btn btn-more" onclick="toggleAbstract(this)">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14,2 14,8 20,8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>Abstrak
+    </button>
+    <span class="doi-chip">10.1016/S0377-2217(01)00321-6</span>
+  </div>
+  <div class="abstract-panel">
+    <div class="abstract-label">Abstrak</div>
+    <div class="abstract-text"><strong>Paper pertama yang memperkenalkan masalah MPDCMST</strong>. Kawatra (2002) mengusulkan metode hybrid Lagrangean Relaxation dengan branch exchange pada horizon perencanaan 10 tahun. Dirujuk dalam artikel sebagai landasan historis yang menjelaskan mengapa masalah MPDCMST muncul (keterbatasan dana, cuaca, kondisi geografis) dan mengapa perluasan b-ACO ke MPDCMST relevan.</div>
+  </div>
+</div>
+
+<!-- ── 2003 ── -->
+<div class="year-divider"><span class="year-label">2003</span><div class="year-line"></div></div>
+
+<div class="ref-card" data-type="journal" data-year="2003" data-doi="1">
+  <div class="card-main">
+    <div class="card-meta-row">
+      <div class="ref-num">17</div>
+      <div class="card-text">
+        <div class="ref-authors">Blum, C., &amp; Roli, A.</div>
+        <a class="ref-title" href="https://doi.org/10.1145/937503.937505" target="_blank">Metaheuristics in combinatorial optimization: Overview and conceptual comparison</a>
+        <div class="ref-venue"><em>ACM Computing Surveys</em>, <strong>35</strong>(3), 268–308.</div>
+        <div class="card-tags"><span class="tag">Survey</span><span class="tag">Metaheuristik</span><span class="tag">ACO</span></div>
+      </div>
+    </div>
+  </div>
+  <div class="card-actions">
+    <a class="btn btn-doi" href="https://doi.org/10.1145/937503.937505" target="_blank">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15,3 21,3 21,9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>DOI
+    </a>
+    <button class="btn btn-more" onclick="toggleAbstract(this)">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14,2 14,8 20,8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>Abstrak
+    </button>
+    <span class="doi-chip">10.1145/937503.937505</span>
+  </div>
+  <div class="abstract-panel">
+    <div class="abstract-label">Abstrak</div>
+    <div class="abstract-text">Survey komprehensif metaheuristik dalam optimisasi kombinatorial. Dirujuk dalam artikel untuk: (1) mendukung efektivitas ACO pada masalah kombinatorial secara umum, (2) menjelaskan trade-off antara eksplorasi dan eksploitasi dalam konteks varians tinggi b-ACO, dan (3) menjustifikasi early stopping sebagai respons terhadap konvergensi distribusi pheromone.</div>
+  </div>
+</div>
+
+<!-- ── 2004 ── -->
+<div class="year-divider"><span class="year-label">2004</span><div class="year-line"></div></div>
+
+<div class="ref-card" data-type="book" data-year="2004">
+  <div class="card-main">
+    <div class="card-meta-row">
+      <div class="ref-num">18</div>
+      <div class="card-text">
+        <div class="ref-authors">Dorigo, M., &amp; Stützle, T.</div>
+        <a class="ref-title" href="https://mitpress.mit.edu/9780262042192/" target="_blank">Ant colony optimization</a>
+        <div class="ref-venue">MIT Press.</div>
+        <div class="card-tags"><span class="tag book">Buku</span><span class="tag">ACO</span><span class="tag">Referensi Utama</span></div>
+      </div>
+    </div>
+  </div>
+  <div class="card-actions">
+    <a class="btn btn-scholar" href="https://scholar.google.com/scholar?q=Dorigo+Stutzle+2004+Ant+Colony+Optimization+MIT+Press" target="_blank">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2L2 7l10 5 10-5-10-5z"/><path d="M2 17l10 5 10-5M2 12l10 5 10-5"/></svg>Scholar
+    </a>
+    <button class="btn btn-more" onclick="toggleAbstract(this)">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14,2 14,8 20,8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>Abstrak
+    </button>
+  </div>
+  <div class="abstract-panel">
+    <div class="abstract-label">Abstrak</div>
+    <div class="abstract-text">Buku referensi utama ACO oleh pencipta paradigma ini. Menjelaskan secara mendalam teori, implementasi, dan aplikasi ACO pada berbagai masalah kombinatorial. Dirujuk dalam artikel untuk mendukung deskripsi arsitektur dasar ACO (multi-agen, positive feedback, pheromone trail) dan menjelaskan mengapa ACO secara konseptual selaras dengan sifat NP-hard dari DCMST.</div>
+  </div>
+</div>
+
+<!-- ── 2006 ── -->
+<div class="year-divider"><span class="year-label">2006</span><div class="year-line"></div></div>
+
+<div class="ref-card" data-type="journal" data-year="2006" data-doi="1">
+  <div class="card-main">
+    <div class="card-meta-row">
+      <div class="ref-num">19</div>
+      <div class="card-text">
+        <div class="ref-authors">Andrade, D. V., Resende, M. G. C., &amp; Werneck, R. F.</div>
+        <a class="ref-title" href="https://link.springer.com/article/10.1007/s10732-012-9196-4" target="_blank">Fast local search for the maximum independent set problem</a>
+        <div class="ref-venue"><em>Journal of Heuristics</em>, <strong>12</strong>(6), 405–428.</div>
+        <div class="card-tags"><span class="tag">Lagrangian</span><span class="tag">DCMST</span><span class="tag">Eksak</span></div>
+      </div>
+    </div>
+  </div>
+  <div class="card-actions">
+    <a class="btn btn-doi" href="https://link.springer.com/article/10.1007/s10732-012-9196-4" target="_blank">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15,3 21,3 21,9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>DOI
+    </a>
+    <button class="btn btn-more" onclick="toggleAbstract(this)">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2"/></svg>Abstrak
+    </button>
+    <span class="doi-chip">10.1007/s10732-012-9196-4</span>
+  </div>
+  <div class="abstract-panel">
+    <div class="abstract-label">Abstrak</div>
+    <div class="abstract-text">Andrade et al. (2006) mengeksplorasi Lagrangian relaxation untuk DCMST. Dirujuk dalam artikel sebagai salah satu pendekatan eksak yang meskipun memberikan solusi optimal terverifikasi, keterbatasan skalabilitasnya pada instance besar mendorong pengembangan metaheuristik seperti ACO.</div>
+  </div>
+</div>
+
+<!-- ── 2008 ── -->
+<div class="year-divider"><span class="year-label">2008</span><div class="year-line"></div></div>
+
+<div class="ref-card" data-type="journal" data-year="2008">
+  <div class="card-main">
+    <div class="card-meta-row">
+      <div class="ref-num">20</div>
+      <div class="card-text">
+        <div class="ref-authors">Bau, Y.-T., Ho, C.-K., & Ewe, H.-T.</div>
+        <a class="ref-title" href="https://doi.org/10.1007/11596448_97 " target="_blank">Ant colony optimization approaches to the degree-constrained minimum spanning tree problem</a>
+        <div class="ref-venue"><em>Journal of Information Science and Engineering</em>, <strong>24</strong>(4), 1081–1094.</div>
+        <div class="card-tags"><span class="tag">ACO</span><span class="tag">p-ACO</span><span class="tag">k-ACO</span><span class="tag">Referensi Utama</span></div>
+      </div>
+    </div>
+  </div>
+  <div class="card-actions">
+    <a class="btn btn-doi" href="http://www.iis.sinica.edu.tw/page/jise/2008/200807_04.html" target="_blank">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15,3 21,3 21,9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>JISE
+    </a>
+    <a class="btn btn-scholar" href="https://www.semanticscholar.org/paper/Ant-Colony-Optimization-Approaches-to-the-Minimum-Bau-Ho/b17ff26fbe7f83272c4b579206254b8eb4766630" target="_blank">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2L2 7l10 5 10-5-10-5z"/><path d="M2 17l10 5 10-5M2 12l10 5 10-5"/></svg>Semantic Scholar
+    </a>
+    <button class="btn btn-more" onclick="toggleAbstract(this)">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14,2 14,8 20,8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>Abstrak
+    </button>
+    <span class="doi-chip">https://doi.org/10.1007/11596448_97</span>
+  </div>
+  <div class="abstract-panel">
+    <div class="abstract-label">Abstrak</div>
+    <div class="abstract-text"><strong>Referensi utama langsung artikel ini.</strong> Bau et al. (2008) mengusulkan p-ACO (komponen solusi berbasis vertex, terinspirasi Prim) dan k-ACO (komponen solusi berbasis edge, terinspirasi Kruskal) untuk DCMST. Hasilnya: k-ACO secara konsisten mengungguli p-ACO, dan enhanced k-ACO mencapai kinerja terbaik pada SHRD. <em>Gap yang diidentifikasi: algoritma Borůvka belum pernah dijadikan basis komponen solusi ACO</em> — gap inilah yang diisi oleh b-ACO dalam artikel ini. (JISE tidak menggunakan sistem DOI; Scopus ID: 2-s2.0-48849098462)</div>
+  </div>
+</div>
+
+<!-- ── 2009 ── -->
+<div class="year-divider"><span class="year-label">2009</span><div class="year-line"></div></div>
+
+<div class="ref-card" data-type="journal" data-year="2009">
+  <div class="card-main">
+    <div class="card-meta-row">
+      <div class="ref-num">21</div>
+      <div class="card-text">
+        <div class="ref-authors">Martins, S. L., &amp; Souza, M. J. F.</div>
+        <a class="ref-title" href="https://www.sciencedirect.com/science/article/pii/S0166218X01002554" 
+		target="_blank">A variable neighborhood search approach for the degree-constrained minimum spanning tree problem</a>
+        <div class="ref-venue"><em>Electronic Notes in Discrete Mathematics</em>, <strong>35</strong>, 285–290.</div>
+        <div class="card-tags"><span class="tag">VNS</span><span class="tag">DCMST</span><span class="tag">Heuristik</span></div>
+      </div>
+    </div>
+  </div>
+  <div class="card-actions">
+    <a class="btn btn-scholar" href="https://scholar.google.com/scholar?q=Martins+Souza+2009+variable+neighborhood+search+degree+constrained+spanning+tree" target="_blank">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2L2 7l10 5 10-5-10-5z"/><path d="M2 17l10 5 10-5M2 12l10 5 10-5"/></svg>Scholar
+    </a>
+    <button class="btn btn-more" onclick="toggleAbstract(this)">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14,2 14,8 20,8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>Abstrak
+    </button>
+  </div>
+  <div class="abstract-panel">
+    <div class="abstract-label">Abstrak</div>
+    <div class="abstract-text">Martins &amp; Souza (2009) menunjukkan bahwa <strong>Variable Neighborhood Search (VNS)</strong> mampu menghasilkan solusi berkualitas tinggi untuk DCMST dengan model neighborhood dinamis. Digunakan dalam artikel sebagai representasi heuristik berbasis pencarian lokal yang menunjukkan betapa besar ruang perbaikan yang masih tersedia pada masalah DCMST.</div>
+  </div>
+</div>
+
+<!-- ── 2015 ── -->
+<div class="year-divider"><span class="year-label">2015</span><div class="year-line"></div></div>
+
+<div class="ref-card" data-type="journal" data-year="2015">
+  <div class="card-main">
+    <div class="card-meta-row">
+      <div class="ref-num">22</div>
+      <div class="card-text">
+        <div class="ref-authors">Wamiliana, Elfaki, F. A. M., Usman, M., & Azram, M.</div>
+        <a class="ref-title" href="https://www.academia.edu/24800676" target="_blank">Some greedy based algorithms for multi periods degree constrained minimum spanning tree problem</a>
+        <div class="ref-venue"><em>ARPN Journal of Engineering and Applied Sciences</em>, <strong>10</strong>(21), 10147–10152.</div>
+        <div class="card-tags"><span class="tag">MPDCMST</span><span class="tag">WADR</span><span class="tag">Greedy</span></div>
+      </div>
+    </div>
+  </div>
+  <div class="card-actions">
+    <a class="btn btn-scholar" href="https://scholar.google.com/scholar?q=Wamiliana+Elfaki+2015+greedy+multi+periods+degree+constrained+minimum+spanning+tree" target="_blank">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2L2 7l10 5 10-5-10-5z"/><path d="M2 17l10 5 10-5M2 12l10 5 10-5"/></svg>Scholar
+    </a>
+    <button class="btn btn-more" onclick="toggleAbstract(this)">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14,2 14,8 20,8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>Abstrak
+    </button>
+  </div>
+  <div class="abstract-panel">
+    <div class="abstract-label">Abstrak</div>
+    <div class="abstract-text">Wamiliana et al. (2015) mengusulkan algoritma WADR1–WADR5 berbasis modifikasi Kruskal dan Prim untuk MPDCMST. Diimplementasikan pada 300 masalah acak (n=10–100). Merupakan bagian dari seri penelitian Wamiliana yang membangun dasar algoritma-algoritma MPDCMST yang kemudian menjadi konteks perbandingan bagi kontribusi b-ACO ke MPDCMST.</div>
+  </div>
+</div>
+
+<!-- ── 2016 ── -->
+<div class="year-divider"><span class="year-label">2016</span><div class="year-line"></div></div>
+
+<div class="ref-card" data-type="journal" data-year="2016" data-doi="1">
+  <div class="card-main">
+    <div class="card-meta-row">
+      <div class="ref-num">23</div>
+      <div class="card-text">
+        <div class="ref-authors">Bicalho, L., da Cunha, A. S., &amp; Lucena, A.</div>
+        <a class="ref-title" href="https://doi.org/10.1007/s10589-015-9788-7" target="_blank">Branch-and-cut-and-price algorithms for the degree-constrained minimum spanning tree problem</a>
+        <div class="ref-venue"><em>Computational Optimization and Applications</em>, <strong>63</strong>(3), 755–792.</div>
+        <div class="card-tags"><span class="tag">Eksak</span><span class="tag">Branch-Cut-Price</span><span class="tag">DCMST</span></div>
+      </div>
+    </div>
+  </div>
+  <div class="card-actions">
+    <a class="btn btn-doi" href="https://doi.org/10.1007/s10589-015-9788-7" target="_blank">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15,3 21,3 21,9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>DOI
+    </a>
+    <button class="btn btn-more" onclick="toggleAbstract(this)">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14,2 14,8 20,8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>Abstrak
+    </button>
+    <span class="doi-chip">10.1007/s10589-015-9788-7</span>
+  </div>
+  <div class="abstract-panel">
+    <div class="abstract-label">Abstrak</div>
+    <div class="abstract-text">Bicalho et al. (2016) mengembangkan algoritma <strong>branch-and-cut-and-price</strong> — metode eksak terkuat saat ini untuk DCMST yang menggabungkan branch-and-cut dengan column generation. Dirujuk dalam artikel sebagai representasi state-of-the-art pendekatan eksak yang meski dapat memberikan solusi optimal terverifikasi, keterbatasan skalabilitasnya pada instance besar tetap memerlukan pendekatan heuristik.</div>
+  </div>
+</div>
+
+<!-- ── 2017 ── -->
+<div class="year-divider"><span class="year-label">2017</span><div class="year-line"></div></div>
+
+<div class="ref-card" data-type="journal" data-year="2017" data-doi="1">
+  <div class="card-main">
+    <div class="card-meta-row">
+      <div class="ref-num">24</div>
+      <div class="card-text">
+        <div class="ref-authors">Mariano, A., Proença, A., & Sousa, C. da S. (2015)</div>
+        <a class="ref-title" href="https://ieeexplore.ieee.org/document/7092783" 
+		target="_blank">A Generic and Highly efficient parallel variant of Boruvka’s algorithm</a>
+        <div class="ref-venue"><em>Journal of Parallel and Distributed Computing</em>, <strong>108</strong>, 34–47.</div>
+        <div class="card-tags"><span class="tag">Paralel</span><span class="tag">Borůvka</span><span class="tag">GPU</span></div>
+      </div>
+    </div>
+  </div>
+  <div class="card-actions">
+    <a class="btn btn-doi" href="https://doi.org/10.1109/PDP.2015.72" target="_blank">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15,3 21,3 21,9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>DOI
+    </a>
+    <button class="btn btn-more" onclick="toggleAbstract(this)">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14,2 14,8 20,8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>Abstrak
+    </button>
+    <span class="doi-chip">10.1109/PDP.2015.72</span>
+  </div>
+  <div class="abstract-panel">
+    <div class="abstract-label">Abstrak</div>
+    <div class="abstract-text">Makalah ini menyajikan: (i) suatu varian paralel dari algoritma Borůvka yang bersifat independen terhadap platform dan merupakan pemecah masalah Minimum Spanning Tree (MST) yang efisien, serta (ii) suatu perbandingan komprehensif terhadap berbagai implementasi pemecah masalah MST, baik pada chip CPU multi-core maupun GPU.
+
+Inti dari varian yang kami usulkan adalah kontraksi graf yang efektif dan eksplisit. Implementasi kami pada CPU multi-core menunjukkan skalabilitas linear hingga 8 thread, sedangkan implementasi pada GPU memberikan kinerja yang jauh lebih baik dibandingkan jumlah thread optimal yang dijalankan pada CPU.
+
+Kami juga menunjukkan bahwa implementasi kami mengungguli semua implementasi pemecah masalah MST paralel lainnya yang dibandingkan pada bagian (ii), untuk berbagai graf jaringan jalan yang tersedia secara publik.</div>
+  </div>
+</div>
+
+<!-- ── 2018 ── -->
+<div class="year-divider"><span class="year-label">2018</span><div class="year-line"></div></div>
+
+<div class="ref-card" data-type="journal" data-year="2018" data-doi="1">
+  <div class="card-main">
+    <div class="card-meta-row">
+      <div class="ref-num">25</div>
+      <div class="card-text">
+        <div class="ref-authors">Wamiliana, Asmiati, Usman, M., Hijriani, A., &amp; Hastono, W. C.</div>
+        <a class="ref-title" href="https://doi.org/10.17485/ijst/2018/v11i11/117069" target="_blank">Comparative analysis of some modified Prim's algorithms to solve the multiperiod degree constrained minimum spanning tree problem</a>
+        <div class="ref-venue"><em>Indian Journal of Science and Technology</em>, <strong>11</strong>(11), 1–6.</div>
+        <div class="card-tags"><span class="tag">MPDCMST</span><span class="tag">WAC1–3</span><span class="tag">Modified Prim</span></div>
+      </div>
+    </div>
+  </div>
+  <div class="card-actions">
+    <a class="btn btn-doi" href="https://doi.org/10.17485/ijst/2018/v11i11/117069" target="_blank">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15,3 21,3 21,9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>DOI
+    </a>
+    <button class="btn btn-more" onclick="toggleAbstract(this)">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14,2 14,8 20,8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>Abstrak
+    </button>
+    <span class="doi-chip">10.17485/ijst/2018/v11i11/117069</span>
+  </div>
+  <div class="abstract-panel">
+    <div class="abstract-label">Abstrak</div>
+    <div class="abstract-text">
+	Membandingkan algoritma WAC1, WAC2, dan WAC3 dengan algoritma WADR1, WADR2, WADR3, WADR4, dan WADR5 untuk menyelesaikan masalah Multiperiod Degree Constrained Minimum Spanning Tree.
+
+Metode/Analisis Statistik: WAC1, WAC2, dan WAC3 adalah algoritma yang dikembangkan dengan memodifikasi algoritma Prim untuk Minimum Spanning Tree (MST) serta mengadopsi periode instalasi/penghubungan simpul dalam jaringan. Pada algoritma WAC1, WAC2, dan WAC3, dipertimbangkan HVTk, yaitu himpunan simpul yang harus dihubungkan pada periode ke-
+𝑘
+k, sedangkan pada WADR5 hal ini tidak dipertimbangkan.
+
+Pada WAC1, simpul-simpul dalam HVTk harus diinstal sedini mungkin. Pada WAC2, simpul-simpul tersebut tidak diprioritaskan untuk segera dihubungkan, tetapi dapat dihubungkan kapan saja selama koneksinya masih berada dalam periode berjalan tersebut. Pada WAC3, diadopsi nilai 2-path terkecil untuk simpul yang sedang dipertimbangkan agar dihubungkan.
+
+Semua algoritma yang diusulkan menggunakan data yang sama dengan yang digunakan pada WADR1, WADR2, WADR3, WADR4, dan WADR5.
+
+Temuan: Karena algoritma WAC1, WAC2, WAC3, dan WADR5 didasarkan pada algoritma Prim yang dimodifikasi, maka sifat keterhubungan (connectivity property) tetap terjaga selama proses instalasi/penghubungan, berbeda dengan WADR1, WADR2, WADR3, dan WADR4 yang didasarkan pada algoritma Kruskal. Berdasarkan penggunaan data yang sama dan sifat keterhubungan tersebut, hasil penelitian menunjukkan bahwa kinerja WAC2 adalah yang terbaik di antara algoritma-algoritma yang dikembangkan.
+
+Aplikasi/Peningkatan: Dengan mempertimbangkan penerapan di dunia nyata pada masalah instalasi jaringan, algoritma WAC2 merupakan salah satu alternatif solusi karena mampu mempertahankan sifat keterhubungan dan memberikan kinerja terbaik.
+
+Kata kunci: Analisis Komparatif, Keterhubungan, Degree Constrained, Prim Termodifikasi, Multi Period
+	</div>
+  </div>
+</div>
+
+<!-- ── 2020 ── -->
+<div class="year-divider"><span class="year-label">2020</span><div class="year-line"></div></div>
+
+<div class="ref-card" data-type="conf" data-year="2020" data-doi="1">
+  <div class="card-main">
+    <div class="card-meta-row">
+      <div class="ref-num">26</div>
+      <div class="card-text">
+        <div class="ref-authors">Wamiliana, Junaidi, A., Amanto, Usman, M., & Warsono. (2020). </div>
+        <a class="ref-title" href="https://doi.org/10.1088/1742-6596/1524/1/012046" target="_blank">WAC4 algorithm to solve the multiperiod degree constrained minimum spanning tree problem</a>
+        <div class="ref-venue"><em>Journal of Physics: Conference Series</em>, <strong>1524</strong>, Article 012046.</div>
+        <div class="card-tags"><span class="tag conf">Prosiding</span><span class="tag">MPDCMST</span><span class="tag">WAC4</span></div>
+      </div>
+    </div>
+  </div>
+  <div class="card-actions">
+    <a class="btn btn-doi" href="https://doi.org/10.1088/1742-6596/1524/1/012046" target="_blank">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15,3 21,3 21,9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>DOI
+    </a>
+    <button class="btn btn-more" onclick="toggleAbstract(this)">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14,2 14,8 20,8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>Abstrak
+    </button>
+    <span class="doi-chip">10.1088/1742-6596/1524/1/012046</span>
+  </div>
+  <div class="abstract-panel">
+    <div class="abstract-label">Abstrak</div>
+    <div class="abstract-text">Wamiliana et al. (2020) mengusulkan <strong>algoritma WAC4</strong> — pengembangan WAC1 dengan faktor probabilistik p dan q untuk menentukan urutan instalasi vertex HVTi. Dirujuk dalam artikel sebagai bagian dari seri penelitian MPDCMST Wamiliana yang menunjukkan masalah ini aktif diteliti dan relevan, serta memberikan konteks algoritmik yang menunjukkan GAP: belum ada pendekatan berbasis ACO untuk MPDCMST.</div>
+  </div>
+</div>
+
+<!-- ── 2021 ── -->
+<div class="year-divider"><span class="year-label">2021</span><div class="year-line"></div></div>
+
+<div class="ref-card" data-type="journal" data-year="2021" data-doi="1">
+  <div class="card-main">
+    <div class="card-meta-row">
+      <div class="ref-num">27</div>
+      <div class="card-text">
+        <div class="ref-authors">Ghoshal, S., &amp; Sundar, S.</div>
+        <a class="ref-title" href="https://doi.org/10.1016/j.swevo.2021.100872" target="_blank">An artificial bee colony algorithm for the degree-constrained minimum spanning tree problem</a>
+        <div class="ref-venue"><em>Swarm and Evolutionary Computation</em>, <strong>62</strong>, Article 100872.</div>
+        <div class="card-tags"><span class="tag">ABC</span><span class="tag">Swarm</span><span class="tag">DCMST</span><span class="tag">State-of-the-Art</span></div>
+      </div>
+    </div>
+  </div>
+  <div class="card-actions">
+    <a class="btn btn-doi" href="https://doi.org/10.1016/j.swevo.2021.100872" target="_blank">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15,3 21,3 21,9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>DOI
+    </a>
+    <button class="btn btn-more" onclick="toggleAbstract(this)">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14,2 14,8 20,8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>Abstrak
+    </button>
+    <span class="doi-chip">10.1016/j.swevo.2021.100872</span>
+  </div>
+  <div class="abstract-panel">
+    <div class="abstract-label">Abstrak</div>
+    <div class="abstract-text">Ghoshal &amp; Sundar (2021) mengusulkan hybrid ABC (hABC) dengan populasi hanya 3 solusi untuk DCMST. Hasilnya mengejutkan: <strong>41 nilai terbaik baru</strong> pada 105 benchmark instances, melampaui seluruh state-of-the-art. Dirujuk dalam artikel sebagai bukti bahwa algoritma berbasis swarm intelligence memiliki keunggulan struktural dalam mengeksplorasi ruang solusi DCMST yang kompleks — mendukung motivasi pengembangan b-ACO.</div>
+  </div>
+</div>
+
+<!-- ── 2024 ── -->
+<div class="year-divider"><span class="year-label">2024</span><div class="year-line"></div></div>
+<div class="ref-card" data-type="journal" data-year="2024" data-doi="1">
+  <div class="card-main">
+    <div class="card-meta-row">
+      <div class="ref-num">28</div>
+      <div class="card-text">
+        <div class="ref-authors">Wamiliana, Junaidi, A., Gamal, M. D. H., &amp; Thamrin, T.</div>
+        <a class="ref-title" href="https://doi.org/10.26554/sti.2024.9.4.999-1008" target="_blank">The use of probability and edge analysis to solve the multi-period degree constrained minimum spanning tree problem</a>
+        <div class="ref-venue"><em>Science and Technology Indonesia</em>, <strong>9</strong>(4), 999–1008.</div>
+        <div class="card-tags"><span class="tag">MPDCMST</span><span class="tag">Probabilitas</span><span class="tag">Analisis Edge</span><span class="tag">Terkini</span></div>
+      </div>
+    </div>
+  </div>
+  
+  <div class="card-actions">
+    <a class="btn btn-doi" href="https://doi.org/10.26554/sti.2024.9.4.999-1008" target="_blank">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15,3 21,3 21,9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>DOI
+    </a>
+    <a class="btn btn-dl" href="https://doi.org/10.26554/sti.2024.9.4.999-1008" target="_blank">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7,10 12,15 17,10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>PDF
+    </a>
+    <button class="btn btn-more" onclick="toggleAbstract(this)">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14,2 14,8 20,8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>Abstrak
+    </button>
+    <span class="doi-chip">10.26554/sti.2024.9.4.999-1008</span>
+  </div>
+
+  <div class="abstract-panel">
+    <div class="abstract-label">Abstrak</div>
+    <div class="abstract-text">
+      Tujuan dari masalah <strong>Multiperiod Degree Constrained Minimum Spanning Tree (MPDCMST)</strong> adalah menentukan pohon merentang dengan bobot minimum yang memenuhi kriteria pemasangan vertex pada setiap periode serta mempertahankan batas derajat pada setiap vertex. Masalah ini muncul sebagai persoalan koneksi jaringan, di mana batas derajat menunjukkan tingkat keandalan setiap vertex, sedangkan kebutuhan pemasangan atau koneksi vertex menunjukkan prioritas vertex yang harus dimasukkan ke dalam jaringan dalam rentang waktu tertentu. Proses pemasangan dibagi ke dalam beberapa fase atau tahap karena berbagai pertimbangan, seperti cuaca ekstrem, keterbatasan anggaran, dan faktor lainnya. Dalam penelitian ini diusulkan dua algoritma untuk menyelesaikan MPDCMST, yaitu pendekatan probabilitas yang dihybridisasi dengan modifikasi algoritma <strong>Prim</strong>, serta <strong>analisis edge</strong>. Kedua algoritma tersebut diimplementasikan pada graf lengkap tak berarah dengan orde 10 hingga 100. Solusi yang diperoleh dibandingkan dengan beberapa heuristik yang sudah ada dalam literatur, dan hasilnya menunjukkan bahwa algoritma yang diusulkan memberikan kinerja yang lebih baik.
+    </div>
+  </div>
+</div>
+
+<div id="noResults">
+  <div class="nr-icon">🔍</div>
+  <h3>Tidak Ada Hasil</h3>
+  <p>Coba kata kunci lain atau reset filter</p>
+</div>
+
+</main>
+
+<footer>
+  <strong>Daftar Pustaka b-ACO · DCMST</strong> &nbsp;·&nbsp; 28 Referensi &nbsp;·&nbsp; APA 7th Edition &nbsp;·&nbsp; 1926–2024
+</footer>
+
+<button class="btt" id="btt" onclick="window.scrollTo({top:0,behavior:'smooth'})">
+  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="18,15 12,9 6,15"/></svg>
+</button>
+
+<script>
+// ── ABSTRACT TOGGLE ──
+function toggleAbstract(btn) {
+  const card = btn.closest('.ref-card');
+  const panel = card.querySelector('.abstract-panel');
+  const isOpen = panel.classList.contains('open');
+  panel.classList.toggle('open');
+  btn.classList.toggle('open');
+  btn.querySelector('svg + *') || true;
+  const spans = btn.querySelectorAll('svg');
+  btn.childNodes.forEach(n => { if(n.nodeType === 3) n.textContent = isOpen ? 'Abstrak' : 'Tutup'; });
+}
+
+// ── SEARCH ──
+const searchInput = document.getElementById('searchInput');
+const cards = document.querySelectorAll('.ref-card');
+const dividers = document.querySelectorAll('.year-divider');
+const noResults = document.getElementById('noResults');
+const visibleCountEl = document.getElementById('visibleCount');
+let activeFilter = 'all';
+
+function applyFilters() {
+  const q = searchInput.value.toLowerCase().trim();
+  let count = 0;
+  cards.forEach(card => {
+    const text = card.textContent.toLowerCase();
+    const type = card.dataset.type;
+    const hasDoi = card.dataset.doi === '1';
+    const matchSearch = !q || text.includes(q);
+    const matchFilter =
+      activeFilter === 'all' ||
+      (activeFilter === 'doi' && hasDoi) ||
+      (activeFilter === type);
+    if (matchSearch && matchFilter) {
+      card.classList.remove('hidden'); count++;
+    } else {
+      card.classList.add('hidden');
+    }
+  });
+  // hide year dividers with no visible cards
+  dividers.forEach(div => {
+    let next = div.nextElementSibling;
+    let hasVisible = false;
+    while (next && !next.classList.contains('year-divider')) {
+      if (next.classList.contains('ref-card') && !next.classList.contains('hidden')) hasVisible = true;
+      next = next.nextElementSibling;
+    }
+    div.style.display = hasVisible ? '' : 'none';
+  });
+  noResults.style.display = count === 0 ? 'block' : 'none';
+  visibleCountEl.textContent = count;
+}
+
+searchInput.addEventListener('input', applyFilters);
+
+document.querySelectorAll('.filter-btn').forEach(btn => {
+  btn.addEventListener('click', () => {
+    document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+    activeFilter = btn.dataset.filter;
+    applyFilters();
+  });
+});
+
+// ── BACK TO TOP ──
+window.addEventListener('scroll', () => {
+  document.getElementById('btt').classList.toggle('visible', window.scrollY > 300);
+});
+
+// ── STAGGER ANIMATION ──
+cards.forEach((card, i) => {
+  card.style.animationDelay = (i * 40) + 'ms';
+});
+</script>
+</body>
+</html>
